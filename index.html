@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រង និងស្រង់អវត្តមានសិស្ស-គ្រូ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kantumruy Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        secondary: '#6366f1',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        purple: '#8b5cf6'
+                    },
+                    fontFamily: {
+                        khmer: ['"Kantumruy Pro"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 flex items-center p-4 mb-4 text-gray-800 rounded-lg shadow-lg border bg-white" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div id="toast-msg" class="ml-3 text-sm font-medium mr-4">ប្រតិបត្តិការជោគជ័យ!</div>
+        <button type="button" onclick="hideToast()" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 inline-flex items-center justify-center h-8 w-8">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-100 flex-shrink-0">
+        <div class="p-4 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base leading-tight">ប្រព័ន្ធគ្រប់គ្រងសាលា</h1>
+                    <p class="text-xs text-slate-400">ស្រង់អវត្តមានសិស្ស-គ្រូ</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-1">
+            <button onclick="switchTab('teacher-info')" id="nav-teacher-info" class="nav-btn w-full flex items-center space-x-3 space-x-reverse px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-id-card w-5 text-center text-sky-400"></i>
+                <span>ព័ត៌មានគ្រូបង្រៀន</span>
+            </button>
+            <button onclick="switchTab('teacher-attendance')" id="nav-teacher-attendance" class="nav-btn w-full flex items-center space-x-3 space-x-reverse px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-user-check w-5 text-center text-indigo-400"></i>
+                <span>ស្រង់អវត្តមានគ្រូ</span>
+            </button>
+            <button onclick="switchTab('student-manage')" id="nav-student-manage" class="nav-btn w-full flex items-center space-x-3 space-x-reverse px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users w-5 text-center text-emerald-400"></i>
+                <span>បញ្ជូលឈ្មោះសិស្ស</span>
+            </button>
+            <button onclick="switchTab('student-attendance')" id="nav-student-attendance" class="nav-btn w-full flex items-center space-x-3 space-x-reverse px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-clipboard-user w-5 text-center text-amber-400"></i>
+                <span>ស្រង់អវត្តមានសិស្ស</span>
+            </button>
+            <button onclick="switchTab('reports-analytics')" id="nav-reports-analytics" class="nav-btn w-full flex items-center space-x-3 space-x-reverse px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-chart-pie w-5 text-center text-rose-400"></i>
+                <span>របាយការណ៍ និងវិភាគ</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+
+        <!-- 1. ព័ត៌មានគ្រូបង្រៀន (Teacher Info) -->
+        <section id="tab-teacher-info" class="tab-content hidden space-y-6">
+            <div class="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">ព័ត៌មានគ្រូបង្រៀន</h2>
+                    <p class="text-xs text-slate-500 mt-1">បំពេញទិន្នន័យផ្ទាល់ខ្លួនដើម្បីរក្សាទុកក្នុងប្រព័ន្ធ (បំពេញតែម្ដងប៉ុណ្ណោះ)</p>
+                </div>
+                <span id="teacher-status-badge" class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full flex items-center gap-1">
+                    <i class="fa-solid fa-circle-exclamation"></i> មិនទាន់មានទិន្នន័យ
+                </span>
+            </div>
+
+            <form id="teacherForm" onsubmit="saveTeacherInfo(event)" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                <!-- ឈ្មោះ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">គោត្តនាម (ខ្មែរ) *</label>
+                        <input type="text" id="tKhmerLastName" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="ឧ. កែវ">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">នាម (ខ្មែរ) *</label>
+                        <input type="text" id="tKhmerFirstName" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="ឧ. សុខា">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Last Name (Latin) *</label>
+                        <input type="text" id="tLatinLastName" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="e.g. KEO">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">First Name (Latin) *</label>
+                        <input type="text" id="tLatinFirstName" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="e.g. SOKHA">
+                    </div>
+                </div>
+
+                <!-- ភេទ & អត្តលេខ -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">ភេទ *</label>
+                        <select id="tGender" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm bg-white">
+                            <option value="">-- ជ្រើសរើស --</option>
+                            <option value="ប្រុស">ប្រុស</option>
+                            <option value="ស្រី">ស្រី</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">លេខទូរសព្ទ *</label>
+                        <input type="tel" id="tPhone" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="012345678">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">អ៊ីម៉ែល</label>
+                        <input type="email" id="tEmail" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="example@mail.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">អត្តលេខមន្ត្រីរាជការ</label>
+                        <input type="text" id="tCivilId" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="123456789">
+                    </div>
+                </div>
+
+                <!-- អត្តសញ្ញាណប័ណ្ណ & សុពលភាព -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">លេខអត្តសញ្ញាណប័ណ្ណ</label>
+                        <input type="text" id="tNationalId" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="0987654321">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">សុពលភាព (ចាប់ពី)</label>
+                        <input type="date" id="tValidFrom" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">សុពលភាព (ដល់ថ្ងៃ)</label>
+                        <input type="date" id="tValidTo" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <!-- ទីកន្លែងកំណើត -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-house-user text-sky-500"></i> ទីកន្លែងកំណើត
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <input type="text" id="tPobVillage" placeholder="ភូមិ" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tPobCommune" placeholder="ឃុំ / សង្កាត់" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tPobDistrict" placeholder="ស្រុក / ខណ្ឌ" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tPobProvince" placeholder="ខេត្ត / រាជធានី" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <!-- ទីកន្លែងបច្ចុប្បន្ន -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-rose-500"></i> ទីកន្លែងបច្ចុប្បន្ន
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <input type="text" id="tCurVillage" placeholder="ភូមិ" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tCurCommune" placeholder="ឃុំ / សង្កាត់" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tCurDistrict" placeholder="ស្រុក / ខណ្ឌ" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <input type="text" id="tCurProvince" placeholder="ខេត្ត / រាជធានី" class="px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-xl shadow-lg shadow-sky-200 transition flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកទិន្នន័យ
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 2. ស្រង់អវត្តមានគ្រូបង្រៀន (Teacher Attendance) -->
+        <section id="tab-teacher-attendance" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">ស្រង់អវត្តមានគ្រូបង្រៀន</h2>
+                    <p class="text-xs text-slate-500 mt-1">កត់ត្រាវត្តមានផ្ទាល់ខ្លួនប្រចាំថ្ងៃ និងពិនិត្យរបាយការណ៍ប្រចាំខែ</p>
+                </div>
+                <div id="active-teacher-display" class="text-sm bg-slate-100 px-4 py-2 rounded-xl text-slate-700 font-medium">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Form ស្រង់វត្តមាន -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base border-b pb-2">ចុះវត្តមានថ្ងៃនេះ</h3>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">កាលបរិច្ឆេទ</label>
+                        <input type="date" id="tAttDate" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">ពេលវេលា</label>
+                        <input type="time" id="tAttTime" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-2">ស្ថានភាពវត្តមាន</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="selectTeacherStatus('PRESENT')" id="t-status-PRESENT" class="t-status-btn p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 font-medium text-sm flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-circle-check"></i> វត្តមាន
+                            </button>
+                            <button type="button" onclick="selectTeacherStatus('LEAVE')" id="t-status-LEAVE" class="t-status-btn p-3 rounded-xl border border-amber-200 bg-white text-slate-600 font-medium text-sm flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-envelope-open-text"></i> ច្បាប់
+                            </button>
+                            <button type="button" onclick="selectTeacherStatus('ABSENT')" id="t-status-ABSENT" class="t-status-btn p-3 rounded-xl border border-rose-200 bg-white text-slate-600 font-medium text-sm flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-circle-xmark"></i> អវត្តមាន
+                            </button>
+                            <button type="button" onclick="selectTeacherStatus('MISSION')" id="t-status-MISSION" class="t-status-btn p-3 rounded-xl border border-indigo-200 bg-white text-slate-600 font-medium text-sm flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-briefcase"></i> បេសកកម្ម
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tNoteContainer" class="hidden">
+                        <label id="tNoteLabel" class="block text-xs font-medium text-slate-700 mb-1">កំណត់ចំណាំ / មូលហេតុ *</label>
+                        <textarea id="tAttNote" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm" placeholder="បញ្ជាក់មូលហេតុ..."></textarea>
+                    </div>
+
+                    <button type="button" onclick="saveTeacherAttendance()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-100 transition text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> កត់ត្រាវត្តមាន
+                    </button>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 text-base">ប្រតិទិនវត្តមានប្រចាំខែ</h3>
+                            <input type="month" id="tCalMonth" onchange="renderTeacherCalendar()" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs text-slate-500 mb-2">
+                            <div class="text-rose-500">អាទិត្យ</div>
+                            <div>ច័ន្ទ</div>
+                            <div>អង្គារ</div>
+                            <div>ពុធ</div>
+                            <div>ព្រហស្បតិ៍</div>
+                            <div>សុក្រ</div>
+                            <div class="text-indigo-500">សៅរ៍</div>
+                        </div>
+                        <div id="tCalendarDays" class="grid grid-cols-7 gap-1 text-xs min-h-[260px]">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-4 text-xs">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> វត្តមាន</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ច្បាប់</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> អវត្តមាន</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> បេសកកម្ម</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. បញ្ជូលឈ្មោះសិស្ស (Add & Manage Students) -->
+        <section id="tab-student-manage" class="tab-content hidden space-y-6">
+            <div class="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">គ្រប់គ្រង និងបន្ថែមឈ្មោះសិស្ស</h2>
+                    <p class="text-xs text-slate-500 mt-1">បន្ថែមសិស្សថ្មី កែប្រែ ឬលុបទិន្នន័យសិស្សក្នុងថ្នាក់</p>
+                </div>
+                <button onclick="openStudentModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> បន្ថែមសិស្សថ្មី
+                </button>
+            </div>
+
+            <!-- Student List Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
+                    <div class="relative w-full md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchStudentInput" onkeyup="filterStudents()" placeholder="ស្វែងរកឈ្មោះសិស្ស..." class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <span id="studentCountBadge" class="text-xs font-medium text-slate-500 self-center">សរុប៖ 0 នាក់</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase border-b border-slate-100">
+                            <tr>
+                                <th class="p-3">រូបថត</th>
+                                <th class="p-3">ឈ្មោះសិស្ស</th>
+                                <th class="p-3">ភេទ</th>
+                                <th class="p-3">ថ្ងៃខែឆ្នាំកំណើត</th>
+                                <th class="p-3">ទីកន្លែងកំណើត</th>
+                                <th class="p-3">ទីកន្លែងបច្ចុប្បន្ន</th>
+                                <th class="p-3 text-center">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamically Rendered -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ស្រង់អវត្តមានសិស្ស (Student Attendance) -->
+        <section id="tab-student-attendance" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">ស្រង់អវត្តមានសិស្សប្រចាំថ្ងៃ</h2>
+                    <p class="text-xs text-slate-500 mt-1">កំណត់វត្តមានសិស្សម្នាក់ៗ និងរក្សាទុកទិន្នន័យ</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="date" id="stdAttDate" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <input type="time" id="stdAttTime" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">សិស្សសរុប</p>
+                        <h4 id="sumTotal" class="text-xl font-bold text-slate-800">0</h4>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-emerald-600 font-medium">វត្តមាន</p>
+                        <h4 id="sumPresent" class="text-xl font-bold text-emerald-600">0</h4>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-amber-600 font-medium">ច្បាប់</p>
+                        <h4 id="sumLeave" class="text-xl font-bold text-amber-600">0</h4>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-rose-600 font-medium">អវត្តមាន</p>
+                        <h4 id="sumAbsent" class="text-xl font-bold text-rose-600">0</h4>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm flex items-center justify-between col-span-2 md:col-span-1">
+                    <div>
+                        <p class="text-xs text-indigo-600 font-medium">បេសកកម្ម</p>
+                        <h4 id="sumMission" class="text-xl font-bold text-indigo-600">0</h4>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Attendance List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-800 text-sm">បញ្ជីឈ្មោះសិស្សសម្រាប់ស្រង់វត្តមាន</h3>
+                    <div class="flex gap-2">
+                        <button onclick="markAllStudents('PRESENT')" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 text-xs rounded-lg transition font-medium">
+                            វត្តមានទាំងអស់
+                        </button>
+                    </div>
+                </div>
+
+                <div id="studentAttList" class="space-y-3">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <div class="flex justify-end pt-4 border-t">
+                    <button onclick="saveStudentAttendance()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-amber-200 transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកការស្រង់វត្តមាន
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. របាយការណ៍ និងវិភាគ (Reports & Analytics) -->
+        <section id="tab-reports-analytics" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">របាយការណ៍ និងវិភាគទិន្នន័យ</h2>
+                    <p class="text-xs text-slate-500 mt-1">មើលក្រាហ្វិកវិភាគ និងទិន្នន័យវត្តមានសិស្សប្រចាំខែ</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs text-slate-500 font-medium">ជ្រើសរើសខែ/ឆ្នាំ៖</label>
+                    <input type="month" id="reportMonthFilter" onchange="renderAnalytics()" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Bar Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-sky-500"></i> ក្រាហ្វសសរ (ការប្រៀបធៀបវត្តមានប្រចាំខែ)
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pie Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-rose-500"></i> ក្រាហ្វផ្លិត (សមាមាត្រភាគរយនៃវត្តមាន)
+                    </h3>
+                    <div class="relative h-64 flex justify-center">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Monthly Log Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                <h3 class="text-sm font-bold text-slate-800 border-b pb-3">កំណត់ត្រាអវត្តមានប្រចាំខែ</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase border-b border-slate-100">
+                            <tr>
+                                <th class="p-3">កាលបរិច្ឆេទ</th>
+                                <th class="p-3">ឈ្មោះសិស្ស</th>
+                                <th class="p-3">ស្ថានភាព</th>
+                                <th class="p-3">មូលហេតុ / កំណត់ចំណាំ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportLogBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal បញ្ចូល/កែប្រែទិន្នន័យសិស្ស -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 id="modalStudentTitle" class="font-bold text-slate-800 text-base">បន្ថែមសិស្សថ្មី</h3>
+                <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="studentForm" onsubmit="saveStudent(event)" class="p-6 space-y-4">
+                <input type="hidden" id="stdEditId">
+                
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <!-- Photo Upload -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-24 h-24 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 relative group">
+                            <img id="stdPhotoPreview" src="" class="w-full h-full object-cover hidden">
+                            <i id="stdPhotoIcon" class="fa-solid fa-camera text-slate-400 text-2xl"></i>
+                            <input type="file" id="stdPhotoInput" accept="image/*" onchange="previewStudentPhoto(event)" class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+                        <span class="text-[10px] text-slate-400">ជ្រើសរើសរូបថត (ជម្រើស)</span>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">ឈ្មោះសិស្ស (ខ្មែរ) *</label>
+                            <input type="text" id="stdName" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm" placeholder="ឧ. ចាន់ សុភា">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">ភេទ *</label>
+                            <select id="stdGender" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm bg-white">
+                                <option value="">-- ជ្រើសរើស --</option>
+                                <option value="ប្រុស">ប្រុស</option>
+                                <option value="ស្រី">ស្រី</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">ថ្ងៃខែឆ្នាំកំណើត</label>
+                            <input type="date" id="stdDob" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <!-- ទីកន្លែងកំណើត -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-700 mb-2">ទីកន្លែងកំណើត (ជម្រើស)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <input type="text" id="stdPobVillage" placeholder="ភូមិ" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdPobCommune" placeholder="ឃុំ / សង្កាត់" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdPobDistrict" placeholder="ស្រុក / ខណ្ឌ" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdPobProvince" placeholder="ខេត្ត / រាជធានី" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- ទីកន្លែងបច្ចុប្បន្ន -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-700 mb-2">ទីកន្លែងបច្ចុប្បន្ន (ជម្រើស)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <input type="text" id="stdCurVillage" placeholder="ភូមិ" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdCurCommune" placeholder="ឃុំ / សង្កាត់" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdCurDistrict" placeholder="ស្រុក / ខណ្ឌ" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="stdCurProvince" placeholder="ខេត្ត / រាជធានី" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-medium rounded-xl hover:bg-slate-50">បោះបង់</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl shadow-md">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal បង្ហាញព័ត៌មានលម្អិតសិស្ស -->
+    <div id="studentDetailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base">ព័ត៌មានលម្អិតសិស្ស</h3>
+                <button onclick="closeStudentDetailModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="studentDetailContent" class="space-y-3 text-xs text-slate-700">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript App Logic -->
+    <script>
+        // State Keys in LocalStorage
+        const LS_KEYS = {
+            TEACHER_INFO: 'app_teacher_info',
+            TEACHER_ATT: 'app_teacher_att',
+            STUDENTS: 'app_students',
+            STUDENT_ATT: 'app_student_att'
+        };
+
+        // Current Selected State
+        let selectedTeacherStatus = 'PRESENT';
+        let currentTempStudentPhoto = '';
+        let currentStudentAttState = {}; // { studentId: { status, note } }
+        let chartInstances = {};
+
+        // Window Init
+        window.onload = function() {
+            // Set Default Dates & Times
+            const today = new Date().toISOString().split('T')[0];
+            const nowTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
+            const currentMonth = new Date().toISOString().substring(0, 7);
+
+            document.getElementById('tAttDate').value = today;
+            document.getElementById('tAttTime').value = nowTime;
+            document.getElementById('tCalMonth').value = currentMonth;
+            document.getElementById('stdAttDate').value = today;
+            document.getElementById('stdAttTime').value = nowTime;
+            document.getElementById('reportMonthFilter').value = currentMonth;
+
+            // Load Data & Render Views
+            loadTeacherInfo();
+            renderTeacherCalendar();
+            renderStudentTable();
+            initStudentAttendanceView();
+            
+            // Default Tab
+            switchTab('teacher-info');
+        };
+
+        // Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-slate-800', 'text-white');
+                activeBtn.classList.remove('text-slate-300');
+            }
+
+            if (tabId === 'teacher-attendance') {
+                renderTeacherCalendar();
+            } else if (tabId === 'student-attendance') {
+                initStudentAttendanceView();
+            } else if (tabId === 'reports-analytics') {
+                renderAnalytics();
+            }
+        }
+
+        // Toast Helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'success') {
+                toastIcon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-emerald-500 bg-emerald-100 rounded-lg";
+                toastIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if (type === 'error') {
+                toastIcon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-rose-500 bg-rose-100 rounded-lg";
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            }
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(hideToast, 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            toast.classList.remove('translate-y-0', 'opacity-100');
+        }
+
+        /* ------------------------------------------------------------------
+           1. TEACHER INFO MODULE
+        ------------------------------------------------------------------- */
+        function saveTeacherInfo(e) {
+            e.preventDefault();
+            const data = {
+                khmerLastName: document.getElementById('tKhmerLastName').value,
+                khmerFirstName: document.getElementById('tKhmerFirstName').value,
+                latinLastName: document.getElementById('tLatinLastName').value,
+                latinFirstName: document.getElementById('tLatinFirstName').value,
+                gender: document.getElementById('tGender').value,
+                phone: document.getElementById('tPhone').value,
+                email: document.getElementById('tEmail').value,
+                civilId: document.getElementById('tCivilId').value,
+                nationalId: document.getElementById('tNationalId').value,
+                validFrom: document.getElementById('tValidFrom').value,
+                validTo: document.getElementById('tValidTo').value,
+                pob: {
+                    village: document.getElementById('tPobVillage').value,
+                    commune: document.getElementById('tPobCommune').value,
+                    district: document.getElementById('tPobDistrict').value,
+                    province: document.getElementById('tPobProvince').value
+                },
+                cur: {
+                    village: document.getElementById('tCurVillage').value,
+                    commune: document.getElementById('tCurCommune').value,
+                    district: document.getElementById('tCurDistrict').value,
+                    province: document.getElementById('tCurProvince').value
+                }
+            };
+
+            localStorage.setItem(LS_KEYS.TEACHER_INFO, JSON.stringify(data));
+            loadTeacherInfo();
+            showToast('រក្សាទុកព័ត៌មានគ្រូបង្រៀនបានជោគជ័យ!');
+        }
+
+        function loadTeacherInfo() {
+            const raw = localStorage.getItem(LS_KEYS.TEACHER_INFO);
+            const badge = document.getElementById('teacher-status-badge');
+            const display = document.getElementById('active-teacher-display');
+
+            if (!raw) {
+                badge.className = "px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full flex items-center gap-1";
+                badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> មិនទាន់មានទិន្នន័យ';
+                display.innerHTML = '<span class="text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i> សូមបំពេញព័ត៌មានគ្រូបង្រៀនជាមុនសិន</span>';
+                return;
+            }
+
+            const data = JSON.parse(raw);
+            document.getElementById('tKhmerLastName').value = data.khmerLastName || '';
+            document.getElementById('tKhmerFirstName').value = data.khmerFirstName || '';
+            document.getElementById('tLatinLastName').value = data.latinLastName || '';
+            document.getElementById('tLatinFirstName').value = data.latinFirstName || '';
+            document.getElementById('tGender').value = data.gender || '';
+            document.getElementById('tPhone').value = data.phone || '';
+            document.getElementById('tEmail').value = data.email || '';
+            document.getElementById('tCivilId').value = data.civilId || '';
+            document.getElementById('tNationalId').value = data.nationalId || '';
+            document.getElementById('tValidFrom').value = data.validFrom || '';
+            document.getElementById('tValidTo').value = data.validTo || '';
+
+            if (data.pob) {
+                document.getElementById('tPobVillage').value = data.pob.village || '';
+                document.getElementById('tPobCommune').value = data.pob.commune || '';
+                document.getElementById('tPobDistrict').value = data.pob.district || '';
+                document.getElementById('tPobProvince').value = data.pob.province || '';
+            }
+
+            if (data.cur) {
+                document.getElementById('tCurVillage').value = data.cur.village || '';
+                document.getElementById('tCurCommune').value = data.cur.commune || '';
+                document.getElementById('tCurDistrict').value = data.cur.district || '';
+                document.getElementById('tCurProvince').value = data.cur.province || '';
+            }
+
+            badge.className = "px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full flex items-center gap-1";
+            badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> រក្សាទុកក្នុងប្រព័ន្ធរួចរាល់';
+
+            display.innerHTML = `<i class="fa-solid fa-user-tie text-sky-600"></i> គ្រូបង្រៀន៖ <b>${data.khmerLastName} ${data.khmerFirstName}</b> (${data.phone})`;
+        }
+
+        /* ------------------------------------------------------------------
+           2. TEACHER ATTENDANCE MODULE
+        ------------------------------------------------------------------- */
+        function selectTeacherStatus(status) {
+            selectedTeacherStatus = status;
+            document.querySelectorAll('.t-status-btn').forEach(btn => {
+                btn.className = "t-status-btn p-3 rounded-xl border bg-white text-slate-600 font-medium text-sm flex items-center justify-center gap-2 transition";
+            });
+
+            const activeBtn = document.getElementById(`t-status-${status}`);
+            const noteContainer = document.getElementById('tNoteContainer');
+            const noteLabel = document.getElementById('tNoteLabel');
+
+            if (status === 'PRESENT') {
+                activeBtn.className = "t-status-btn p-3 rounded-xl border border-emerald-500 bg-emerald-50 text-emerald-700 font-medium text-sm flex items-center justify-center gap-2 transition";
+                noteContainer.classList.add('hidden');
+            } else if (status === 'LEAVE') {
+                activeBtn.className = "t-status-btn p-3 rounded-xl border border-amber-500 bg-amber-50 text-amber-700 font-medium text-sm flex items-center justify-center gap-2 transition";
+                noteContainer.classList.remove('hidden');
+                noteLabel.innerText = "មូលហេតុច្បាប់ *";
+            } else if (status === 'ABSENT') {
+                activeBtn.className = "t-status-btn p-3 rounded-xl border border-rose-500 bg-rose-50 text-rose-700 font-medium text-sm flex items-center justify-center gap-2 transition";
+                noteContainer.classList.remove('hidden');
+                noteLabel.innerText = "កំណត់ចំណាំអវត្តមាន (ជម្រើស)";
+            } else if (status === 'MISSION') {
+                activeBtn.className = "t-status-btn p-3 rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-700 font-medium text-sm flex items-center justify-center gap-2 transition";
+                noteContainer.classList.remove('hidden');
+                noteLabel.innerText = "មូលហេតុបេសកកម្ម *";
+            }
+        }
+
+        function saveTeacherAttendance() {
+            const date = document.getElementById('tAttDate').value;
+            const time = document.getElementById('tAttTime').value;
+            const note = document.getElementById('tAttNote').value.trim();
+
+            if (!date || !time) {
+                showToast('សូមជ្រើសរើសកាលបរិច្ឆេទ និងពេលវេលា', 'error');
+                return;
+            }
+
+            if ((selectedTeacherStatus === 'LEAVE' || selectedTeacherStatus === 'MISSION') && !note) {
+                showToast('សូមបញ្ចូលមូលហេតុច្បាស់លាស់', 'error');
+                return;
+            }
+
+            const records = JSON.parse(localStorage.getItem(LS_KEYS.TEACHER_ATT) || '{}');
+            records[date] = { status: selectedTeacherStatus, time, note };
+
+            localStorage.setItem(LS_KEYS.TEACHER_ATT, JSON.stringify(records));
+            showToast('កត់ត្រាវត្តមានគ្រូបានជោគជ័យ!');
+            document.getElementById('tAttNote').value = '';
+            renderTeacherCalendar();
+        }
+
+        function renderTeacherCalendar() {
+            const container = document.getElementById('tCalendarDays');
+            container.innerHTML = '';
+            const monthVal = document.getElementById('tCalMonth').value; // YYYY-MM
+            if (!monthVal) return;
+
+            const [year, month] = monthVal.split('-').map(Number);
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            const records = JSON.parse(localStorage.getItem(LS_KEYS.TEACHER_ATT) || '{}');
+
+            // Blank space before 1st of month
+            for (let i = 0; i < firstDayIndex; i++) {
+                container.innerHTML += `<div class="h-12 rounded-xl bg-slate-50/50"></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = d < 10 ? `0${d}` : `${d}`;
+                const dateKey = `${monthVal}-${dayStr}`;
+                const rec = records[dateKey];
+
+                let bgClass = "bg-slate-50 border-slate-100 text-slate-600";
+                let icon = "";
+
+                if (rec) {
+                    if (rec.status === 'PRESENT') {
+                        bgClass = "bg-emerald-500 text-white font-bold";
+                        icon = '<i class="fa-solid fa-check text-[10px]"></i>';
+                    } else if (rec.status === 'LEAVE') {
+                        bgClass = "bg-amber-500 text-white font-bold";
+                        icon = '<i class="fa-solid fa-envelope text-[10px]"></i>';
+                    } else if (rec.status === 'ABSENT') {
+                        bgClass = "bg-rose-500 text-white font-bold";
+                        icon = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+                    } else if (rec.status === 'MISSION') {
+                        bgClass = "bg-indigo-500 text-white font-bold";
+                        icon = '<i class="fa-solid fa-briefcase text-[10px]"></i>';
+                    }
+                }
+
+                container.innerHTML += `
+                    <div class="h-12 border rounded-xl p-1 flex flex-col items-center justify-between transition ${bgClass}" title="${rec ? rec.status + (rec.note ? ': ' + rec.note : '') : ''}">
+                        <span>${d}</span>
+                        <span>${icon}</span>
+                    </div>
+                `;
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           3. STUDENT MANAGEMENT MODULE
+        ------------------------------------------------------------------- */
+        function openStudentModal(id = null) {
+            document.getElementById('studentForm').reset();
+            document.getElementById('stdEditId').value = '';
+            document.getElementById('stdPhotoPreview').src = '';
+            document.getElementById('stdPhotoPreview').classList.add('hidden');
+            document.getElementById('stdPhotoIcon').classList.remove('hidden');
+            currentTempStudentPhoto = '';
+
+            if (id) {
+                document.getElementById('modalStudentTitle').innerText = 'កែប្រែទិន្នន័យសិស្ស';
+                const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+                const std = students.find(s => s.id === id);
+                if (std) {
+                    document.getElementById('stdEditId').value = std.id;
+                    document.getElementById('stdName').value = std.name;
+                    document.getElementById('stdGender').value = std.gender;
+                    document.getElementById('stdDob').value = std.dob || '';
+
+                    if (std.pob) {
+                        document.getElementById('stdPobVillage').value = std.pob.village || '';
+                        document.getElementById('stdPobCommune').value = std.pob.commune || '';
+                        document.getElementById('stdPobDistrict').value = std.pob.district || '';
+                        document.getElementById('stdPobProvince').value = std.pob.province || '';
+                    }
+
+                    if (std.cur) {
+                        document.getElementById('stdCurVillage').value = std.cur.village || '';
+                        document.getElementById('stdCurCommune').value = std.cur.commune || '';
+                        document.getElementById('stdCurDistrict').value = std.cur.district || '';
+                        document.getElementById('stdCurProvince').value = std.cur.province || '';
+                    }
+
+                    if (std.photo) {
+                        currentTempStudentPhoto = std.photo;
+                        document.getElementById('stdPhotoPreview').src = std.photo;
+                        document.getElementById('stdPhotoPreview').classList.remove('hidden');
+                        document.getElementById('stdPhotoIcon').classList.add('hidden');
+                    }
+                }
+            } else {
+                document.getElementById('modalStudentTitle').innerText = 'បន្ថែមសិស្សថ្មី';
+            }
+
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        function previewStudentPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentTempStudentPhoto = e.target.result;
+                    document.getElementById('stdPhotoPreview').src = currentTempStudentPhoto;
+                    document.getElementById('stdPhotoPreview').classList.remove('hidden');
+                    document.getElementById('stdPhotoIcon').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveStudent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('stdEditId').value;
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+
+            const newStudent = {
+                id: editId ? editId : 'STD-' + Date.now(),
+                name: document.getElementById('stdName').value,
+                gender: document.getElementById('stdGender').value,
+                dob: document.getElementById('stdDob').value,
+                photo: currentTempStudentPhoto,
+                pob: {
+                    village: document.getElementById('stdPobVillage').value,
+                    commune: document.getElementById('stdPobCommune').value,
+                    district: document.getElementById('stdPobDistrict').value,
+                    province: document.getElementById('stdPobProvince').value
+                },
+                cur: {
+                    village: document.getElementById('stdCurVillage').value,
+                    commune: document.getElementById('stdCurCommune').value,
+                    district: document.getElementById('stdCurDistrict').value,
+                    province: document.getElementById('stdCurProvince').value
+                }
+            };
+
+            if (editId) {
+                const idx = students.findIndex(s => s.id === editId);
+                if (idx !== -1) students[idx] = newStudent;
+            } else {
+                students.push(newStudent);
+            }
+
+            localStorage.setItem(LS_KEYS.STUDENTS, JSON.stringify(students));
+            showToast(editId ? 'កែប្រែទិន្នន័យសិស្សជោគជ័យ!' : 'បន្ថែមសិស្សថ្មីបានជោគជ័យ!');
+            closeStudentModal();
+            renderStudentTable();
+            initStudentAttendanceView();
+        }
+
+        function deleteStudent(id) {
+            if (!confirm('តើអ្នកប្រាកដជាចង់លុបទិន្នន័យសិស្សនេះមែនទេ?')) return;
+            let students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            students = students.filter(s => s.id !== id);
+            localStorage.setItem(LS_KEYS.STUDENTS, JSON.stringify(students));
+            showToast('លុបទិន្នន័យសិស្សរួចរាល់');
+            renderStudentTable();
+            initStudentAttendanceView();
+        }
+
+        function viewStudentDetail(id) {
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            const std = students.find(s => s.id === id);
+            if (!std) return;
+
+            const formatAddr = (addr) => {
+                if (!addr) return 'មិនមាន';
+                return [addr.village ? 'ភូមិ' + addr.village : '', addr.commune ? 'ឃុំ/សង្កាត់' + addr.commune : '', addr.district ? 'ស្រុក/ខណ្ឌ' + addr.district : '', addr.province ? 'ខេត្ត' + addr.province : ''].filter(Boolean).join(', ') || 'មិនមាន';
+            };
+
+            const content = document.getElementById('studentDetailContent');
+            content.innerHTML = `
+                <div class="flex items-center gap-4 border-b pb-3">
+                    <img src="${std.photo || 'https://placehold.co/100x100/e2e8f0/64748b?text=Student'}" class="w-16 h-16 rounded-full object-cover border">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">${std.name}</h4>
+                        <p class="text-slate-500">ភេទ៖ ${std.gender} | កំណើត៖ ${std.dob || 'មិនមាន'}</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-semibold text-slate-700">ទីកន្លែងកំណើត៖</p>
+                    <p class="text-slate-500">${formatAddr(std.pob)}</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-slate-700">ទីកន្លែងបច្ចុប្បន្ន៖</p>
+                    <p class="text-slate-500">${formatAddr(std.cur)}</p>
+                </div>
+            `;
+            document.getElementById('studentDetailModal').classList.remove('hidden');
+        }
+
+        function closeStudentDetailModal() {
+            document.getElementById('studentDetailModal').classList.add('hidden');
+        }
+
+        function renderStudentTable() {
+            const tbody = document.getElementById('studentTableBody');
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            document.getElementById('studentCountBadge').innerText = `សរុប៖ ${students.length} នាក់`;
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-slate-400">មិនទាន់មានទិន្នន័យសិស្សនៅឡើយទេ</td></tr>`;
+                return;
+            }
+
+            const formatLoc = loc => loc ? [loc.village, loc.commune, loc.district, loc.province].filter(Boolean).join(', ') : '-';
+
+            tbody.innerHTML = students.map(std => `
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="p-3">
+                        <img src="${std.photo || 'https://placehold.co/80x80/e2e8f0/64748b?text=Pic'}" class="w-8 h-8 rounded-full object-cover border">
+                    </td>
+                    <td class="p-3 font-semibold text-slate-800">${std.name}</td>
+                    <td class="p-3">${std.gender}</td>
+                    <td class="p-3">${std.dob || '-'}</td>
+                    <td class="p-3 truncate max-w-[150px]">${formatLoc(std.pob)}</td>
+                    <td class="p-3 truncate max-w-[150px]">${formatLoc(std.cur)}</td>
+                    <td class="p-3 text-center space-x-1 space-x-reverse">
+                        <button onclick="viewStudentDetail('${std.id}')" class="p-1.5 text-sky-600 hover:bg-sky-50 rounded-lg" title="មើលលម្អិត"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="openStudentModal('${std.id}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg" title="កែប្រែ"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteStudent('${std.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterStudents() {
+            const query = document.getElementById('searchStudentInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#studentTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           4. STUDENT ATTENDANCE TRACKING MODULE
+        ------------------------------------------------------------------- */
+        function initStudentAttendanceView() {
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            const container = document.getElementById('studentAttList');
+            const dateStr = document.getElementById('stdAttDate').value;
+
+            // Load Existing Record for selected Date
+            const allAtt = JSON.parse(localStorage.getItem(LS_KEYS.STUDENT_ATT) || '{}');
+            const dayRecord = allAtt[dateStr] || {};
+
+            currentStudentAttState = {};
+            students.forEach(std => {
+                currentStudentAttState[std.id] = dayRecord[std.id] || { status: 'PRESENT', note: '' };
+            });
+
+            renderStudentAttList();
+            updateAttSummaryCounters();
+        }
+
+        function renderStudentAttList() {
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            const container = document.getElementById('studentAttList');
+
+            if (students.length === 0) {
+                container.innerHTML = `<p class="text-center py-6 text-xs text-slate-400">មិនទាន់មានសិស្សក្នុងថ្នាក់ទេ។ សូមបញ្ចូលឈ្មោះសិស្សជាមុនសិន។</p>`;
+                return;
+            }
+
+            container.innerHTML = students.map(std => {
+                const st = currentStudentAttState[std.id] || { status: 'PRESENT', note: '' };
+
+                return `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-3 border border-slate-100 rounded-xl hover:border-slate-200 transition gap-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${std.photo || 'https://placehold.co/80x80/e2e8f0/64748b?text=Pic'}" class="w-9 h-9 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-800">${std.name}</h4>
+                                <span class="text-[10px] text-slate-400">ភេទ៖ ${std.gender}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Options -->
+                            <button onclick="setStudentStatus('${std.id}', 'PRESENT')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ${st.status === 'PRESENT' ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-slate-600 border-slate-200'}">
+                                វត្តមាន
+                            </button>
+                            <button onclick="setStudentStatus('${std.id}', 'LEAVE')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ${st.status === 'LEAVE' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'}">
+                                ច្បាប់
+                            </button>
+                            <button onclick="setStudentStatus('${std.id}', 'ABSENT')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ${st.status === 'ABSENT' ? 'bg-rose-500 text-white border-rose-500' : 'bg-white text-slate-600 border-slate-200'}">
+                                អវត្តមាន
+                            </button>
+                            <button onclick="setStudentStatus('${std.id}', 'MISSION')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ${st.status === 'MISSION' ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-white text-slate-600 border-slate-200'}">
+                                បេសកកម្ម
+                            </button>
+                        </div>
+
+                        ${st.status !== 'PRESENT' ? `
+                            <div class="w-full md:w-48">
+                                <input type="text" value="${st.note || ''}" onchange="updateStudentNote('${std.id}', this.value)" placeholder="${st.status === 'LEAVE' || st.status === 'MISSION' ? 'បញ្ជាក់មូលហេតុ *' : 'កំណត់ចំណាំ'}" class="w-full px-2.5 py-1 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setStudentStatus(id, status) {
+            if (!currentStudentAttState[id]) currentStudentAttState[id] = { status: 'PRESENT', note: '' };
+            currentStudentAttState[id].status = status;
+            renderStudentAttList();
+            updateAttSummaryCounters();
+        }
+
+        function updateStudentNote(id, note) {
+            if (currentStudentAttState[id]) {
+                currentStudentAttState[id].note = note;
+            }
+        }
+
+        function markAllStudents(status) {
+            Object.keys(currentStudentAttState).forEach(id => {
+                currentStudentAttState[id].status = status;
+            });
+            renderStudentAttList();
+            updateAttSummaryCounters();
+        }
+
+        function updateAttSummaryCounters() {
+            const values = Object.values(currentStudentAttState);
+            const total = values.length;
+            const present = values.filter(v => v.status === 'PRESENT').length;
+            const leave = values.filter(v => v.status === 'LEAVE').length;
+            const absent = values.filter(v => v.status === 'ABSENT').length;
+            const mission = values.filter(v => v.status === 'MISSION').length;
+
+            document.getElementById('sumTotal').innerText = total;
+            document.getElementById('sumPresent').innerText = present;
+            document.getElementById('sumLeave').innerText = leave;
+            document.getElementById('sumAbsent').innerText = absent;
+            document.getElementById('sumMission').innerText = mission;
+        }
+
+        function saveStudentAttendance() {
+            const dateStr = document.getElementById('stdAttDate').value;
+            if (!dateStr) {
+                showToast('សូមជ្រើសរើសកាលបរិច្ឆេទ', 'error');
+                return;
+            }
+
+            const allAtt = JSON.parse(localStorage.getItem(LS_KEYS.STUDENT_ATT) || '{}');
+            allAtt[dateStr] = currentStudentAttState;
+
+            localStorage.setItem(LS_KEYS.STUDENT_ATT, JSON.stringify(allAtt));
+            showToast('រក្សាទុកទិន្នន័យស្រង់វត្តមានសិស្សរួចរាល់!');
+        }
+
+        /* ------------------------------------------------------------------
+           5. REPORTS & ANALYTICS MODULE
+        ------------------------------------------------------------------- */
+        function renderAnalytics() {
+            const monthVal = document.getElementById('reportMonthFilter').value; // YYYY-MM
+            if (!monthVal) return;
+
+            const allAtt = JSON.parse(localStorage.getItem(LS_KEYS.STUDENT_ATT) || '{}');
+            const students = JSON.parse(localStorage.getItem(LS_KEYS.STUDENTS) || '[]');
+            const studentMap = {};
+            students.forEach(s => studentMap[s.id] = s.name);
+
+            let totalPresent = 0;
+            let totalLeave = 0;
+            let totalAbsent = 0;
+            let totalMission = 0;
+
+            const tableBody = document.getElementById('reportLogBody');
+            tableBody.innerHTML = '';
+
+            let hasLogs = false;
+
+            Object.keys(allAtt).sort().forEach(date => {
+                if (date.startsWith(monthVal)) {
+                    const dayRec = allAtt[date];
+                    Object.keys(dayRec).forEach(sId => {
+                        const rec = dayRec[sId];
+                        if (rec.status === 'PRESENT') totalPresent++;
+                        else if (rec.status === 'LEAVE') totalLeave++;
+                        else if (rec.status === 'ABSENT') totalAbsent++;
+                        else if (rec.status === 'MISSION') totalMission++;
+
+                        // Add to log table if not present
+                        if (rec.status !== 'PRESENT') {
+                            hasLogs = true;
+                            let badge = '';
+                            if (rec.status === 'LEAVE') badge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold text-[10px]">ច្បាប់</span>';
+                            else if (rec.status === 'ABSENT') badge = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-semibold text-[10px]">អវត្តមាន</span>';
+                            else if (rec.status === 'MISSION') badge = '<span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded font-semibold text-[10px]">បេសកកម្ម</span>';
+
+                            tableBody.innerHTML += `
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-medium text-slate-700">${date}</td>
+                                    <td class="p-3 font-semibold text-slate-800">${studentMap[sId] || 'មិនស្គាល់'}</td>
+                                    <td class="p-3">${badge}</td>
+                                    <td class="p-3 text-slate-500">${rec.note || '-'}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+            });
+
+            if (!hasLogs) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-slate-400">មិនមានកំណត់ត្រាអវត្តមានក្នុងខែនេះទេ</td></tr>`;
+            }
+
+            // Render Charts
+            renderBarChart([totalPresent, totalLeave, totalAbsent, totalMission]);
+            renderPieChart([totalPresent, totalLeave, totalAbsent, totalMission]);
+        }
+
+        function renderBarChart(dataArr) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            if (chartInstances.barChart) chartInstances.barChart.destroy();
+
+            chartInstances.barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['វត្តមាន', 'ច្បាប់', 'អវត្តមាន', 'បេសកកម្ម'],
+                    datasets: [{
+                        label: 'ចំនួនសរុប (ដង)',
+                        data: dataArr,
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6366f1'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderPieChart(dataArr) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            if (chartInstances.pieChart) chartInstances.pieChart.destroy();
+
+            const total = dataArr.reduce((a, b) => a + b, 0);
+
+            chartInstances.pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['វត្តមាន', 'ច្បាប់', 'អវត្តមាន', 'បេសកកម្ម'],
+                    datasets: [{
+                        data: total === 0 ? [1, 0, 0, 0] : dataArr,
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6366f1']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
